@@ -31,6 +31,17 @@ pipeline {
            }
        }
 
+
+       stage("SonarQube Analysis"){
+           steps {
+	           script {
+		        withSonarQubeEnv(credentialsId: 'jen_son') { 
+                        sh "mvn sonar:sonar"
+		        }
+	           }	
+           }
+       }
+
        
    }
 }
