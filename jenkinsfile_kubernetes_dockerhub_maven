@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        
+        stage('git fetch') {
+            steps {
+                git branch: 'main', credentialsId: 'git_credit', url: 'https://github.com/62xyz62xyz/jen1'
+            }
+        }
+        
+            stage('Maven Clean Package') {
+                steps {
+                    script {
+                        def mavenHome = tool name: "Maven", type: "maven"
+                        def mavenCMD = "${mavenHome}/bin/mvn"
+                        sh "${mavenCMD} clean package"
+                    }
+                }
+            }
+
+        
+        stage("Docker Build") {
+            steps {
+                sh "docker build -t xyzxyz62/jenkins-docker-k8s-project:${env.BUILD_ID} ."
+            }
+        }
+        
+        stage("Docker Push"){
+            steps {
+                withCredentials([string(credentialsId: 'DOcker_ps', variable: 'DOcker_ps')]) {
+                    sh "docker login -u xyzxyz62 -p ${DOcker_ps}"
+        }
+                sh "docker push xyzxyz62/jenkins-docker-k8s-project:${env.BUILD_ID}"
+            }
+        }
+        
+    }
+}
